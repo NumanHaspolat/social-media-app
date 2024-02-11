@@ -11,14 +11,19 @@ import { Loader2, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { RegisterSchema } from "@/lib/validation";
 import { Link } from "react-router-dom";
-import { createUserAcc } from "@/lib/appwrite/api";
+import { useCreateUserAccMutation } from "@/lib/react-query/queriesAndMutations";
 
 const Register = () => {
-  const isLoading: boolean = false;
+  const { toast } = useToast();
+
+  const { mutateAsync: createUserAcc, isLoading: isCreatingUser } =
+    useCreateUserAccMutation();
+
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -31,7 +36,14 @@ const Register = () => {
 
   async function onSubmit(values: z.infer<typeof RegisterSchema>) {
     const newUser = await createUserAcc(values);
-    console.log(newUser);
+    if (!newUser) {
+      return toast({
+        title: "Sign Up failed.Please try again.",
+        description: "",
+      });
+
+      // const session = await signInAcc()
+    }
   }
   return (
     <Form {...form}>
@@ -111,7 +123,7 @@ const Register = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary text-black">
-            {isLoading ? (
+            {isCreatingUser ? (
               <Button disabled>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait

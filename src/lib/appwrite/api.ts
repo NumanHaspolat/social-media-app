@@ -11,7 +11,9 @@ export async function createUserAcc(user: INewUser) {
       user.name
     );
 
-    if (!newAcc) throw Error;
+    if (!newAcc) {
+      throw Error();
+    }
 
     const avatarUrL = avatars.getInitials(user.name);
 
